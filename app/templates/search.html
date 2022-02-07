@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block title %}autoLter - 搜索{% endblock %}
+
+{% block page_content %}
+<h2>精读搜索：{{ keyword }}</h2>
+{% for intensive in intensives %}
+<div class="row">
+    <div class="col-12 row note-list">
+        <div class="col-12 detail">
+            <div class="title"><strong>{{ intensive.paper.title }}</strong>,
+                {{ intensive.paper.journal }}, {{ intensive.paper.date }},
+                {% if intensive.paper.pdf_link %}
+                {% set link_list = intensive.paper.pdf_link.split('/') %}
+                <a href="pdf/{{ link_list[-1] }}" target="_blank">[PDF]</a>, 
+                {% endif %}
+                <a href="{{ intensive.paper.paper_link}}" target="_blank">[LINK]</a>
+            </div>
+            <div class="intro">
+                {{ intensive.content | safe}}
+            </div>
+            <div class="info">
+                <div class="pull-left">
+                    标签: {% for label in intensive.labels.all() %} <a href="{{ url_for('main.label', name=label.name) }}">{{ label.name }}</a>;{% endfor %}
+                </div>
+                <div class="pull-right"><a href="{{ url_for('main.pre_note') }}?id={{ intensive.id }}">继续编辑</a></div>   
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+<h2>略读搜索：{{ keyword }}</h2>
+{% for skimming in skimmings %}
+<div class="row">
+    <div class="col-12 row note-list">
+        <div class="col-12 detail">
+            <div class="title"><strong>{{ skimming.paper.title }}</strong>,
+                {{ skimming.paper.journal }}, {{ skimming.paper.date }},
+                {% if skimming.paper_pdf %}
+                <a href="{{ skimming.paper_pdf}}" target="_blank">[PDF]</a>, 
+                {% endif %}
+                <a href="{{ skimming.paper.paper_link}}" target="_blank">[LINK]</a>
+            </div>
+            <div class="intro">
+                {{ skimming.content | safe}},
+            </div>
+            <div class="info">
+                <div class="pull-left">
+                    标签: {% for label in skimming.labels.all() %} <a href="{{ url_for('main.label', name=label.name) }}">{{ label.name }}</a>; {% endfor %}
+                </div>
+                <div class="pull-right"><a href="{{ url_for('main.pre_note') }}?id={{ skimming.id }}">继续编辑</a></div>   
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+<h2>总结搜索：{{ keyword }}</h2>
+{% for conclusion in conclusions %}
+<div class="row">
+    <div class="col-md-12 row note-list">
+        <div class="col-md-12 detail">
+            <div class="title"><strong>{{ conclusion.title }}</strong></div>
+            <div class="intro">
+                <!-- {{ conclusion.content | striptags | truncate(500) }}, -->
+                {{ conclusion.content | safe }}
+            </div>
+            <div class="info">
+                <div class="pull-right"><a href="{{ url_for('main.pre_post') }}?id={{ conclusion.id }}">继续编辑</a></div>   
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+<h2>想法搜索：{{ keyword }}</h2>
+{% for idea in ideas %}
+<div class="row">
+    <div class="col-md-12 row note-list">
+        <div class="col-md-12 detail">
+            <div class="title"><strong>{{ idea.title }}</strong></div>
+            <div class="intro">
+                {{ idea.content | safe }}
+            </div>
+            <div class="info">
+                <div class="pull-right"><a href="{{ url_for('main.pre_post') }}?id={{ idea.id }}">继续编辑</a></div>   
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+
+{% endblock %}

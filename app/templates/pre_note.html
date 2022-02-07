@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+
+{% block title %}autoLiter - 编辑{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script type="text/javascript" src="{{ url_for('static', filename='js/bootbox.min.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='ue/ueditor.config.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='ue/ueditor.all.js') }}"></script>
+<script type="text/javascript">
+    var ue = UE.getEditor('content', {
+        serverUrl: '/ueditor'
+    });
+</script>
+
+<script type="text/javascript">
+    function doUserPost() {
+        var postid = '{{ post.id }}';
+        var headline = $.trim($("#headline").val());
+        var labels = $.trim($("#myLabels").val())
+        var contentPlain = UE.getEditor("content").getContentTxt();
+
+        if (headline.length < 1) {
+            bootbox.alert({title:"错误提示", message:"标题不能少于1个字"});
+            return false;
+        }
+        else if (contentPlain.length < 10) {
+            bootbox.alert({title:"错误提示", message:"内容不能低于10个字"});
+            return false;
+        }
+
+        // 发送请求时，带上postid
+        var param = "headline=" + headline;
+        param += "&content=" + encodeURIComponent(UE.getEditor("content").getContent());
+        param += "&intensive=" + $("#type").val();
+        param += "&drafted=0";
+        param += "&postid=" + postid;
+        param += "&labels=" + labels;
+        $.post('/addnote', param, function (data) {
+             if (data == "intensive" || data == "skimming") {
+                bootbox.alert({title:"信息提示", message:"发布成功."});
+                setTimeout(function () {
+                    // 跳转到文章首页
+                    location.href = '/' + data;
+                }, 1000);
+            }
+            else {
+                bootbox.alert({title:"错误提示", message:"发布失败."});
+            }
+        });
+    }
+</script>
+
+<script type="text/javascript">
+    function downloadMeta() {
+        var DoiArxivId = $.trim($("#headline").val());
+        if (DoiArxivId.length < 1) {
+            bootbox.alert({title:"错误提示", message:"表单未填文献ID编号"});
+            return false;
+        }
+        // 发送请求内容
+        var param = "DoiArxivId=" + DoiArxivId;
+        param += "&pdf=0";
+        $.post('/addpaper', param, function (data) {
+            if (data == "addpaper") {
+                bootbox.alert({title: "信息提示", message: "文献Meta信息下载成功"});
+            }
+            else if (data == "exist_paper_pdf" | data == "exist_paper_not_pdf") {
+                bootbox.alert({title: "信息提示", message: "文献Meta信息已存在"});
+            }
+            else {
+                bootbox.alert({title: "信息提示", message: "相关笔记已存在"});
+                setTimeout(function () {
+                    // 跳转到文章首页
+                    location.href = '/prenote?id=' + data;
+                }, 1000);
+            }
+        });
+    }
+</script>
+
+<script type="text/javascript">
+    function downloadPdf() {
+        var DoiArxivId = $.trim($("#headline").val());
+        if (DoiArxivId.length < 1) {
+            bootbox.alert({title:"错误提示", message:"表单未填文献ID编号"});
+            return false;
+        }
+        // 发送请求内容
+        var param = "DoiArxivId=" + DoiArxivId;
+        param += "&pdf=1";
+        $.post('/addpaper', param, function (data) {
+            if (data == "addpaper") {
+                bootbox.alert({title: "信息提示", message: "文献PDF信息下载成功"});
+            }
+            else if (data == "exist_paper_pdf" | data == "exist_paper_not_pdf") {
+                bootbox.alert({title: "信息提示", message: "文献PDF信息已经存在"});
+            }
+            else {
+                bootbox.alert({title: "信息提示", message: "相关笔记已存在"});
+                setTimeout(function () {
+                    // 跳转到文章首页
+                    location.href = '/prenote?id=' + data;
+                }, 1000);
+            }
+        });
+    }
+</script>
+{% endblock %}
+
+{% block page_content %}
+<div class="container" style="margin-top: 20px; background-color: white; padding: 20px;">
+    <div class="row form-group">
+        <label for="headline" class="col-md-1">文献</label>
+        {% if post %}
+        <input type="text" class="col-md-6" id="headline" value="{{ post.paper.paper_id }}"/>
+        {% else %}
+        <input type="text" class="col-md-6" id="headline" placeholder="DOI or Arxiv ID"/>
+        {% endif %}
+        <div class="col-md-2">
+            <button class="form-control btn-primary" onclick="downloadMeta()">下载Meta</button>
+        </div>
+        <div class="col-md-1"></div>
+        <div class="col-md-2">
+            <button class="form-control btn-primary" onclick="downloadPdf()">下载Meta&PDF</button>
+        </div>
+    </div>
+    <div class="row">
+        <script id="content" name="content" type="text/plain">
+        {% if post %}{{ post.content | safe }}{% endif %}
+        </script>
+    </div>
+    <div class="row form-group">
+        <label for="labels" class="col-md-1">笔记标签</label>
+        {% if post %}
+        <input type="text" class="col-md-11" id="myLabels" 
+        value="{% for label in post.labels.all() %}{{ label.name }};{% endfor %}"/>
+        {% else %}
+        <input type="text" class="col-md-11" id="myLabels" placeholder="请用英文';'分割不同标签"/>
+        {% endif %}
+    </div>
+
+    <div class="row form-group" style="margin-top: 20px; padding-top: 10px;">
+        <label for="type" class="col-md-1">类型:</label>
+        <div class="col-md-2">
+            <select class="form-control" id="type">
+                <option value="1">精读</option>
+                <option value="2">略读</option>
+            </select>
+        </div>
+        
+        <label class="col-md-4"></label>
+        
+        <label class="col-md-1"></label>
+        <div class="col-md-2">
+            <button class="form-control btn-primary" onclick="doUserPost()">发布文章</button>
+        </div>
+    </div>
+</div>
+{% endblock %}

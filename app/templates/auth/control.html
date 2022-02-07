@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}autoLiter - 个人中心{% endblock %}
+
+{% block page_content %}
+<div class="row">
+    <div class="col-md-2">
+        <ul class="nav nav-pills  nav-stacked">
+            <li><a href="{{ url_for('main.pre_note') }}">新建笔记</a></li>
+            <li><a href="{{ url_for('main.pre_post') }}">新建总结/想法</a></li>
+        </ul>
+    </div>
+    <div class="col-md-10">
+        {% block right_content %}{% endblock %}
+    </div> 
+</div>
+{% endblock %}

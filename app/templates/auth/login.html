@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}autoLiter - Login{% endblock %}
+
+{% block page_content %}
+<div class="page-header">
+    <h1>Login</h1>
+</div>
+<div class="col-md-4">
+    {{ wtf.quick_form(form) }}
+    <br>
+    <p>忘记密码？<a href="{{ url_for('auth.password_reset_request') }}">点击此处重置密码</a>.</p>
+    <p>新用户？<a href="{{ url_for('auth.register') }}">点击此处来注册</a>.</p>
+</div>
+{% endblock %}

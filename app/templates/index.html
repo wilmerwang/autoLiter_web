@@ -1,0 +1,35 @@
+{% extends "base.html"%}
+
+{% block title %}autoLter - 主页{% endblock %}
+
+{% block styles %}
+{{super()}}
+<link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+{% endblock %}
+
+
+{% block page_content %}
+<div id="clock">
+</div>
+<script src="{{ url_for('static', filename='js/radialIndicator.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/angular.radialIndicator.js') }}"></script>
+<script type="text/javascript">
+    var radialObj = radialIndicator('#clock', {
+        radius: 200,
+        barWidth: 40,
+        barColor: '#FF3968',
+        minValue: 0,
+        maxValue: 60,
+        fontWeight: 'normal',
+        roundCorner: true,
+        format: function (value) {
+            var date = new Date();
+            return date.getHours() + ':' + date.getMinutes();
+        }
+    });
+
+    setInterval(function () {
+        radialObj.value(new Date().getSeconds() + 1);
+    }, 1000);
+</script>
+{% endblock %}

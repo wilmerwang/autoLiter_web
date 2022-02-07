@@ -1,0 +1,47 @@
+{% extends "base.html"%}
+{% import "_macros.html" as macros %}
+
+{% block page_content %}
+
+{% for note in notes %}
+<div class="row">
+    <div class="col-12 row note-list">
+        <div class="col-12 detail">
+            <div class="title"><strong>{{ note.paper.title }}</strong>,
+                {{ note.paper.journal }}, {{ note.paper.date }},
+                {% if note.paper.pdf_link %}
+                {% set link_list = note.paper.pdf_link.split('/') %}
+                <a href="pdf/{{ link_list[-1] }}" target="_blank">[PDF]</a>, 
+                {% endif %}
+                <a href="{{ note.paper.paper_link}}" target="_blank">[LINK]</a>
+            </div>
+            <div class="intro">
+                {{ note.content | safe}}
+            </div>
+            <div class="info">
+                <div class="pull-left">
+                    标签: {% for label in note.labels.all() %} <a href="{{ url_for('main.label', name=label.name) }}">{{ label.name }}</a>;{% endfor %}
+                </div>
+                <div class="pull-right">
+                    <a href="{{ url_for('main.del_note') }}?id={{ note.id }}">删除</a>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <a href="{{ url_for('main.pre_note') }}?id={{ note.id }}">继续编辑</a>
+                </div>   
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+{% if notes %}
+{% if pagination %}
+<div class="pagination">
+    {% if notes[0].intensive_reading %}
+    {{ macros.pagination_widget(pagination, "main.intensive_reading", fragment='', id=notes[0].id) }}
+    {% else %}
+    {{ macros.pagination_widget(pagination, "main.skimming", fragment='', id=notes[0].id) }}
+    {% endif %}
+</div>
+{% endif %}
+{% endif %}
+{% endblock %}

@@ -1,0 +1,10 @@
+您好，{{ user.username }}:
+
+欢迎来到autoLiter!
+
+请复制以下链接到浏览器:
+{{ url_for('auth.confirm', token=token, _external=True) }}
+
+autoLiter
+
+注意: 请勿回复该邮件!

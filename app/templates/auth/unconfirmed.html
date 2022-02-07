@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block title %}autoLiter - 验证账户{% endblock %}
+
+{% block page_content %}
+<div class="page-header">
+    <h1>
+        您好,{{ current_user.username }}!
+    </h1>
+    <h3>你还未成功验证您的账户!</h3>
+    <p>
+        在你使用autoLiter之前，您应验证您的账户!
+    </p>
+    <p>
+        需要重新发送验证邮件?
+        <a href="{{ url_for('auth.resend_confirmation') }}">点击此处</a>
+    </p>
+</div>
+{% endblock %}
