@@ -15,6 +15,7 @@ from unidecode import unidecode
 from bs4 import BeautifulSoup 
 
 from config import PROXY
+# PROXY = "127.0.1:7890"
 
 # log config
 logging.basicConfig()
@@ -190,19 +191,21 @@ class urlDownload(object):
         else:
             return False
 
-    @retry(wait_random_min=100, wait_random_max=1000, stop_max_attempt_number=10)
-    def download(self, identifier, destination='', path=None):
+    # @retry(wait_random_min=100, wait_random_max=1000, stop_max_attempt_number=3)
+    def download(self, identifier, destination='', path=None, attemp=5):
         """
         Downloads a paper from sci-hub given an indentifier (DOI, PMID, URL).
         Currently, this can potentially be blocked by a captcha if a certain
         limit has been reached.
         """
-        data = self.fetch(identifier)
-        if not 'err' in data:
-            self._save(data['pdf'],
-                    os.path.join(destination, path))
-
-        return data
+        for i in range(attemp):
+            try:
+                data = self.fetch(identifier)
+                self._save(data['pdf'],
+                           os.path.join(destination, path))
+            except:
+                if i == attemp-1:
+                    break 
 
     def fetch(self, identifier):
         """
@@ -233,17 +236,15 @@ class urlDownload(object):
         except requests.exceptions.ConnectionError:
             logger.info('Cannot access {}, changing url'.format(self.available_base_url_list[0]))
             self._change_base_url()
-            return {
-                "err": "Failed"
-            }
+
 
         except requests.exceptions.RequestException as e:
             logger.info('Failed to fetch pdf with identifier %s (resolved url %s) due to request exception.'
                        % (identifier, url))
-            return {
-                'err': 'Failed to fetch pdf with identifier %s (resolved url %s) due to request exception.'
-                       % (identifier, url)
-            }
+            # return {
+            #     'err': 'Failed to fetch pdf with identifier %s (resolved url %s) due to request exception.'
+            #            % (identifier, url)
+            # }
 
 
     def _get_direct_url(self, identifier):
@@ -255,7 +256,7 @@ class urlDownload(object):
         if id_type == 'url-direct':
             return identifier
         elif id_type == 'url-non-direct':
-            pass 
+            return  identifier
         elif id_type == 'arxivId':
             return "https://arxiv.org/pdf/" + identifier + ".pdf"
         else:
@@ -315,71 +316,70 @@ class urlDownload(object):
         return BeautifulSoup(html, 'html.parser')
     
 
-def download(paper_id, download_pdf, username):
+def download(paper_id, download_pdf):
     meta_extracter = metaExtracter()
     bib_dict = meta_extracter.id2bib(paper_id)
     
     if download_pdf == "1":
-        url_download = urlDownload()
-        url_download.set_proxy(PROXY)
         
         pdf_download_root = 'app/static/pdf/'
         if not os.path.exists(pdf_download_root):
             os.makedirs(pdf_download_root)
         pdf_name = bib_dict['year'] + '_' + bib_dict['title']
         pdf_name = pdf_name[:256] + '.pdf'
-        pdf_path = os.path.join(pdf_download_root, pdf_name)
-        dow_tag = True
-        if "pdf_link" in bib_dict.keys():
-            pdf_dict = url_download.fetch(bib_dict["pdf_link"])
-            if "err" in pdf_dict.keys():
-                try:
-                    url_download.download(paper_id, destination=pdf_download_root, path=pdf_name)
-                except:
-                    dow_tag = False
-            else:
-                with open(pdf_path, 'wb') as f:
-                    f.write(pdf_dict['pdf'])
-        else:
-            try:
-                url_download.download(paper_id, destination=pdf_download_root, path=pdf_name)
-            except:
-                dow_tag = False 
         
+        if "pdf_link" in bib_dict.keys():
+            url_download = urlDownload()
+            url_download.set_proxy(PROXY)
+            url_download.download(bib_dict["pdf_link"], destination=pdf_download_root, path=pdf_name)
+            if not os.path.exists(os.path.join(pdf_download_root, pdf_name)):
+                url_download = urlDownload()
+                url_download.set_proxy(PROXY)
+                url_download.download(paper_id, destination=pdf_download_root, path=pdf_name)
+        else:
+            url_download = urlDownload()
+            url_download.set_proxy(PROXY)
+            url_download.download(paper_id, destination=pdf_download_root, path=pdf_name)
+            
         # if 1, add pdf_path
-        if dow_tag:
+        if os.path.exists(os.path.join(pdf_download_root, pdf_name)):
             bib_dict["pdf_path"] = os.path.join('/static/pdf/', pdf_name)
 
     return bib_dict
     
 
 if __name__ == "__main__":
-    proxy = "127.0.0.1:7890"
-    doi_id = "10.1016/j.wneu.2012.11.074"
-    arv_id = "2202.01351"
-    
-    paper_id = doi_id
-    
-    meta_extracter = metaExtracter()
-    url_download = urlDownload()
-    url_download.set_proxy(proxy)
-    
-    # Meta data
-    bib_dict = meta_extracter.id2bib(paper_id)
+    bib_dict = download("10.1016/j.wneu.2012.11.074", "1")
     print(bib_dict)
+
+
+# if __name__ == "__main__":
+#     proxy = "127.0.0.1:7890"
+#     doi_id = "10.1016/j.wneu.2012.11.074"
+#     arv_id = "2202.01351"
     
-    # PDF download
-    if "pdf_link" in bib_dict.keys():
-        pdf_dict = url_download.fetch(bib_dict["pdf_link"])
-        if "err" in pdf_dict.keys():
-            try:
-                url_download.download(paper_id, destination='', path='test.pdf')
-            except:
-                print("下载失败")
-                pass
-    else:
-        try:
-            url_download.download(paper_id, destination='', path='test.pdf')
-        except:
-            pass 
+#     paper_id = doi_id
+    
+#     meta_extracter = metaExtracter()
+#     url_download = urlDownload()
+#     url_download.set_proxy(proxy)
+    
+#     # Meta data
+#     bib_dict = meta_extracter.id2bib(paper_id)
+#     print(bib_dict)
+    
+#     # PDF download
+#     if "pdf_link" in bib_dict.keys():
+#         pdf_dict = url_download.fetch(bib_dict["pdf_link"])
+#         if "err" in pdf_dict.keys():
+#             try:
+#                 url_download.download(paper_id, destination='', path='test.pdf')
+#             except:
+#                 print("下载失败")
+#                 pass
+#     else:
+#         try:
+#             url_download.download(paper_id, destination='', path='test.pdf')
+#         except:
+#             pass 
         

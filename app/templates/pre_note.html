@@ -93,8 +93,11 @@
             if (data == "addpaper") {
                 bootbox.alert({title: "信息提示", message: "文献PDF信息下载成功"});
             }
-            else if (data == "exist_paper_pdf" | data == "exist_paper_not_pdf") {
+            else if (data == "exist_paper_pdf") {
                 bootbox.alert({title: "信息提示", message: "文献PDF信息已经存在"});
+            }
+            else if (data == "exist_paper_not_pdf") {
+                bootbox.alert({title: "信息提示", message: "文献Meta信息已存在,PDF下载失败"});
             }
             else {
                 bootbox.alert({title: "信息提示", message: "相关笔记已存在"});

@@ -250,7 +250,6 @@ def del_note():
 def add_paper():
     paper_id = request.form.get('DoiArxivId')
     download_pdf = request.form.get('pdf')
-    username = current_user.username
     
     paper = Paper.query.filter_by(paper_id=paper_id).first()
     if paper:
@@ -262,7 +261,7 @@ def add_paper():
             else:
                 return "exist_paper_pdf"
         else:
-            bib_dict = download(paper_id, download_pdf, username)
+            bib_dict = download(paper_id, download_pdf)
             if "pdf_path" in bib_dict.keys():
                 paper.pdf_link = bib_dict['pdf_path']
                 db.session.add(paper)
@@ -279,14 +278,14 @@ def add_paper():
         #         print("")
         #         return "exist_paper_pdf"
         #     else:
-        #         bib_dict = download(paper_id, download_pdf, username)
+        #         bib_dict = download(paper_id, download_pdf)
         #         if "pdf_path" in bib_dict.keys():
         #             paper.pdf_link = bib_dict['pdf_path']
         #             db.session.add(paper)
         #             db.session.commit()
         #         return "exist_paper_not_pdf"
     else:
-        bib_dict = download(paper_id, download_pdf, username)
+        bib_dict = download(paper_id, download_pdf)
         # insert paper
         split_date = bib_dict['year'].split('-')
         if len(split_date) > 1:

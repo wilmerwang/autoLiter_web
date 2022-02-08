@@ -1,0 +1,14 @@
+[Unit]
+Description=uWSGI instance to serve autoliter
+After=network.target
+
+[Service]
+Type=forking
+User=admin
+Group=admin
+WorkingDirectory=/home/admin/autoLiter_web/
+Environment="PATH=/home/admin/anaconda3/envs/autoliter/"
+ExecStart=/home/admin/anaconda3/envs/autoliter/bin/uwsgi --ini uwsgi.ini
+
+[Install]
+WantedBy=multi-user.target
