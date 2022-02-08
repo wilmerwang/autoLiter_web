@@ -232,8 +232,9 @@ def del_note():
             pass 
         else:
             db.session.delete(paper)
-            if os.path.exists("app"+paper.pdf_link):
-                os.remove("app"+paper.pdf_link)
+            if paper.pdf_link:
+                if os.path.exists("app"+paper.pdf_link):
+                    os.remove("app"+paper.pdf_link)
     
     db.session.delete(note)
     db.session.commit()
