@@ -1,10 +1,10 @@
 # autoLiter-web
 autoLiter-web是一个基于Flask以及sqlite3的文献笔记管理器，基于[autoLiteratur](https://github.com/WilmerWang/autoLiterature)项目。
 
-使用以下账户测试本项目:  
-地址：[测试机，不定时下线](http://106.14.22.183:5000/)  
-账号：test@example.com  
-密码：cat  
+~~使用以下账户测试本项目:~~  
+~~地址：测试机，已经下线~~  
+~~账号：test@example.com~~  
+~~密码：cat~~  
 
 ## 特点
 - 自动抓取文献元信息，并下载文献（可选项）
