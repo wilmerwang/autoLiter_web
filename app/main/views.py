@@ -299,7 +299,7 @@ def add_paper():
                         pdf_link=bib_dict['pdf_path'], date=date_)
         else:
             paper_ = Paper(title=bib_dict['title'], journal=bib_dict['journal'],
-                        paper_link=bib_dict["url"], paper_id=paper_id,date=date_)
+                        paper_link=bib_dict["url"], paper_id=paper_id, date=date_)
         db.session.add(paper_)
         db.session.commit()
         

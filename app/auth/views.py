@@ -1,3 +1,4 @@
+import datetime
 from flask import flash, render_template, redirect, request, url_for
 from flask_login import current_user, login_required, login_user, logout_user
 
@@ -15,7 +16,7 @@ def login():
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
         if user is not None and user.verify_password(form.password.data):
-            login_user(user, form.remember_me.data)
+            login_user(user=user, remember=form.remember_me.data, duration=datetime.timedelta(days=360))
             return redirect(request.args.get('next') or url_for('main.index'))
         flash("无效的用户名或者密码!")
     return render_template('auth/login.html',form=form)
