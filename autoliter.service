@@ -6,9 +6,9 @@ After=network.target
 Type=forking
 User=admin
 Group=admin
-WorkingDirectory=/home/admin/autoLiter_web/
+WorkingDirectory=/home/admin/remote/autoLiter_web/
 Environment="PATH=/home/admin/anaconda3/envs/autoliter/"
-ExecStart=/home/admin/anaconda3/envs/autoliter/bin/uwsgi --ini uwsgi.ini
+ExecStart=/usr/local/uwsgi-2.0.20/uwsgi --ini uwsgi.ini
 
 [Install]
 WantedBy=multi-user.target

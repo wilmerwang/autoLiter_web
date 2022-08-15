@@ -3,6 +3,7 @@ from flask_bootstrap import Bootstrap
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from flask_mail import Mail 
+# from flask_jsglue import JSGlue  # 前端使用url_for
 
 from config import config
 
@@ -10,6 +11,7 @@ from config import config
 bootstrap = Bootstrap()
 mail = Mail()
 db = SQLAlchemy()
+# jsglue = JSGlue()
 
 login_manager = LoginManager()
 login_manager.session_protection = 'strong'
@@ -24,6 +26,7 @@ def create_app(config_name):
     bootstrap.init_app(app)
     mail.init_app(app)
     db.init_app(app)
+    # jsglue.init_app(app)
     
     login_manager.init_app(app)
 
@@ -33,7 +36,4 @@ def create_app(config_name):
     from .auth import auth as auth_blueprint
     app.register_blueprint(auth_blueprint, url_prefix='/auth')
     
-    from .ueditor import ueditor as ueditor_blueprint
-    app.register_blueprint(ueditor_blueprint, url_prefix='/ueditor')
-
     return app 

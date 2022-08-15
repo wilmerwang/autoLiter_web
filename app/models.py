@@ -1,4 +1,5 @@
 from datetime import datetime
+from email.policy import default
 from flask import current_app 
 from flask_login import UserMixin
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
@@ -16,7 +17,7 @@ class User(UserMixin, db.Model):
     password_hash = db.Column(db.String(128))
     confirmed = db.Column(db.Boolean, default=False)
     notes = db.relationship('Note', backref="user", lazy='dynamic')
-    ideas = db.relationship('Idea', backref="user", lazy='dynamic')
+    posts = db.relationship('Post', backref="user", lazy='dynamic')
 
     @property
     def password(self):
@@ -79,6 +80,7 @@ class Note(db.Model):
     __tablename__ = "notes"
     id = db.Column(db.Integer, primary_key=True)
     content = db.Column(db.Text)
+    content_html = db.Column(db.Text)
     intensive_reading = db.Column(db.Boolean, default=False)
     time_create = db.Column(db.DateTime, default=datetime.utcnow)
     time_modify = db.Column(db.DateTime, default=datetime.utcnow)
@@ -118,13 +120,13 @@ class Label(db.Model):
     name = db.Column(db.String(128), unique=True)
     
 
-class Idea(db.Model):
-    __tablename__ = "ideas"
+class Post(db.Model):
+    __tablename__ = "Posts"
     id = db.Column(db.Integer, primary_key=True)
-    # True --> idea, False --> conclusion
-    idea = db.Column(db.Boolean, default=True)
+    post_type = db.Column(db.String(256), default=True)
     title = db.Column(db.String(512), unique=True)
     content = db.Column(db.Text)
+    content_html = db.Column(db.Text)
     time_create = db.Column(db.DateTime, default=datetime.utcnow)
     time_modify = db.Column(db.DateTime, default=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
@@ -135,7 +137,7 @@ class Idea(db.Model):
         db.session.commit()
         
     def modified(self, **kwargs):
-        self.idea = kwargs["idea"]
+        self.post_type = kwargs["post_type"]
         self.title = kwargs["title"] 
         self.content = kwargs["content"]
         self.time_modify = datetime.utcnow()
@@ -143,13 +145,20 @@ class Idea(db.Model):
         db.session.add(self)
         db.session.commit()
     
+    # def modified(self, **kwargs):
+    #     keys_ = self.__dict__.keys() & kwargs.keys()
+    #     modified_dict = {key: kwargs[key] for key in keys_}
+    #     self.__dict__.update(modified_dict)
+    #     db.session.add(self)
+    #     db.session.commit()
+    
     @staticmethod
-    def find_by_keyword(idea, keyword, user):
-        posts = Idea.query.filter_by(idea=idea, user=user).filter(
-            or_(Idea.content.like(("%" + keyword + "%") if id is not None else ""),
-                Idea.title.like(("%" + keyword + "%") if id is not None else "")
+    def find_by_keyword(post_type, keyword, user):
+        posts = Post.query.filter_by(post_type=post_type, user=user).filter(
+            or_(Post.content.like(("%" + keyword + "%") if id is not None else ""),
+                Post.title.like(("%" + keyword + "%") if id is not None else "")
                 )
-        ).order_by(Idea.time_modify.desc()).all()
+        ).order_by(Post.time_modify.desc()).all()
         
         return posts 
 
@@ -165,10 +174,27 @@ class Paper(db.Model):
     paper_link = db.Column(db.String(128), unique=True)
     # DOI = db.Column(db.String(128), unique=True)
     # Arx_id = db.Column(db.String(128), unique=True)
-    paper_id = db.Column(db.String(256), unique=True)
-    pdf_link = db.Column(db.String(512), unique=True)
-    date = db.Column(db.Date)
+    paper_id = db.Column(db.String(256), unique=True, default=None)
+    pdf_link = db.Column(db.String(512), unique=True, default=None)
+    pdf_link_online = db.Column(db.String(512), unique=True, default=None)
+    date = db.Column(db.Date, default=datetime.utcnow)
     notes = db.relationship('Note', backref="paper", lazy='dynamic')
+    
+    def insert(self):
+        db.session.add(self)
+        db.session.commit()
+        
+    def modified(self, **kwargs):
+        keys_ = self.__dict__.keys() & kwargs.keys()
+        modified_dict = {key: kwargs[key] for key in keys_}
+        self.__dict__.update(modified_dict)
+        db.session.add(self)
+        db.session.commit()
+        
+    def insert_pdf_link(self, path):
+        self.pdf_link =path
+        db.session.add(self)
+        db.session.commit()
 
 
 

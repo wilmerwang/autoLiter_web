@@ -1,12 +1,17 @@
 import datetime
-import os 
-from flask import Flask, current_app, render_template, request, redirect, url_for
+from fileinput import filename
+import os
+from flask import Flask, current_app, render_template, request, redirect, url_for, jsonify
 from flask_login import current_user
+import logging 
+logging.basicConfig()
+logger = logging.getLogger('view')
+logger.setLevel(logging.INFO)
 
-from ..models import Note, Idea, Label, Paper
+from ..models import Note, Post, Label, Paper
 from .. import db
 from . import main
-from ..util.utils import metaExtracter, urlDownload, download
+from ..util.downloads import get_paper_info_from_paperid, get_paper_pdf_from_paperid
 
 @main.before_request
 def before_request():
@@ -54,25 +59,25 @@ def skimming():
 @main.route('/conclusion')
 def conclusion():
     page = request.args.get('page', 1, type=int)
-    pagination = current_user.ideas.filter_by(idea=False).\
-        order_by(Idea.time_modify.desc()).paginate(
+    pagination = current_user.posts.filter_by(post_type="conclusion").\
+        order_by(Post.time_modify.desc()).paginate(
             page, per_page=current_app.config["AUTOLITER_NOTES_PER_PAGE"],
             error_out=False
     )
-    ideas = pagination.items
-    return render_template('post.html', ideas=ideas, pagination=pagination)
+    conclusions = pagination.items
+    return render_template('post.html', posts=conclusions, pagination=pagination)
 
 
 @main.route('/idea')
 def idea():
     page = request.args.get('page', 1, type=int)
-    pagination = current_user.ideas.filter_by(idea=True).\
-        order_by(Idea.time_modify.desc()).paginate(
+    pagination = current_user.posts.filter_by(post_type='idea').\
+        order_by(Post.time_modify.desc()).paginate(
             page, per_page=current_app.config["AUTOLITER_NOTES_PER_PAGE"],
             error_out=False
     )
     ideas = pagination.items
-    return render_template('post.html', ideas=ideas, pagination=pagination)
+    return render_template('post.html', posts=ideas, pagination=pagination)
 
 
 #####################################################
@@ -96,9 +101,9 @@ def search():
     keyword = request.args.get('keyword')
     
     # idea posts
-    post_idea = Idea().find_by_keyword(idea=True, keyword=keyword, user=current_user)
+    post_idea = Post().find_by_keyword(post_type="idea", keyword=keyword, user=current_user)
     # conclusion posts
-    post_conclusion = Idea().find_by_keyword(idea=False, keyword=keyword, user=current_user)
+    post_conclusion = Post().find_by_keyword(post_type="conclusion", keyword=keyword, user=current_user)
     
     # intensive
     note_intensive = Note.find_by_keyword(intensive=True, keyword=keyword, user=current_user)
@@ -118,35 +123,29 @@ def pre_post():
     if id == None:
         return render_template('pre_post.html', post=None)
     else:
-        post = Idea.query.get(id)
+        post = Post.query.get(int(id))
         return render_template('pre_post.html', post=post)
 
 
 @main.route('/addpost', methods=['POST'])
 def add_post():
     title = request.form.get("headline")
-    content = request.form.get("content")
+    content_md = request.form.get("content_md")
+    content_html = request.form.get("content_html")
     postid = request.form.get('postid')
+    post_type = request.form.get('post_type')
     
-    if request.form.get('idea') == "1":
-        idea = False
-    else:
-        idea = True 
     user = current_user
-    
-    if postid == "":
+    if not postid:
         # insert 
-        post = Idea(title=title, content=content, idea=idea, user=user)
+        post = Post(title=title, content=content_md, content_html=content_html, post_type=post_type, user=user)
         post.insert()
     else:
         # modify
-        post = Idea.query.get(postid)
-        post.modified(title=title, content=content, idea=idea, user=user)
+        post = Post.query.get(postid)
+        post.modified(title=title, content=content_md, content_html=content_html, post_type=post_type, user=user)
     
-    if idea:
-        return "idea"
-    else:
-        return "conclusion"
+    return post_type
 
 
 
@@ -154,23 +153,29 @@ def add_post():
 def pre_note():
     id = request.args.get("id")
     if id == None:
-        return render_template('pre_note.html', post=None)
+        return render_template('pre_note.html', note=None, label=None, paper=None)
     else:
-        post = Note.query.get(id)
-        return render_template('pre_note.html', post=post)
+        note = Note.query.get(int(id))
+        paper = note.paper
+        labels = [i.name for i in note.labels.all()]
+        labels = ';'.join(labels)
+        return render_template('pre_note.html', note=note, label=labels, paper=paper)
     
     
 @main.route('/addnote', methods=['POST'])
 def add_note():
     title = request.form.get("headline")
-    content = request.form.get("content")
-    postid = request.form.get('postid')
+    content_md = request.form.get("content_md")
+    content_html = request.form.get("content_html")
+    note_id = request.form.get('notetid')
+    note_type = request.form.get('note_type')
     labels = request.form.get('labels')
     
-    if request.form.get('intensive') == "1":
+    if note_type == "intensive":
         intensive = True
     else:
         intensive = False 
+    
     user = current_user
     
     labels = [i for i in labels.split(';') if i != '']
@@ -183,38 +188,35 @@ def add_note():
         labels_sql.append(lb)
     db.session.commit()
     
-    if postid == "":
+    if not note_id:
         # insert 
         paper = Paper.query.filter_by(paper_id=title).first()
-        post = Note(content=content, intensive_reading=intensive, user=user, 
-                    paper=paper)
+        post = Note(content=content_md, content_html=content_html, intensive_reading=intensive,
+                    user=user, paper=paper)
         # post.labels.append()
         post.labels.extend(labels_sql)
         post.insert()
     else:
         # modify
-        post = Note.query.get(int(postid))
+        post = Note.query.get(int(note_id))
         for i in post.labels.all(): 
             post.labels.remove(i)
         post.labels.extend(labels_sql)
-        post.modified(content=content, intensive=intensive, user=user)
+        post.modified(content=content_md, content_html=content_html, intensive=intensive, user=user)
 
-    if intensive:
-        return "intensive"
-    else:
-        return "skimming"
+    return note_type
     
     
 @main.route('/delpost', methods=["GET", "POST"])
 def del_post():
     id = request.args.get('id')
-    post = Idea.query.get(int(id))
-    idea = post.idea
+    post = Post.query.get(int(id))
+    post_type = post.post_type
     
     db.session.delete(post)
     db.session.commit()
     
-    if idea:
+    if post_type == "idea":
         return redirect(url_for("main.idea"))
     else:
         return redirect(url_for("main.conclusion"))
@@ -232,9 +234,10 @@ def del_note():
             pass 
         else:
             db.session.delete(paper)
+            logger.info(paper.pdf_link)
             if paper.pdf_link:
-                if os.path.exists("app"+paper.pdf_link):
-                    os.remove("app"+paper.pdf_link)
+                if os.path.exists(paper.pdf_link):
+                    os.remove(paper.pdf_link)
     
     db.session.delete(note)
     db.session.commit()
@@ -249,63 +252,186 @@ def del_note():
 # 下载文献信息
 @main.route('/addpaper', methods=["GET", "POST"])
 def add_paper():
-    paper_id = request.form.get('DoiArxivId')
-    download_pdf = request.form.get('pdf')
+    paper_id = request.form.get('paperId')
     
     paper = Paper.query.filter_by(paper_id=paper_id).first()
     if paper:
         note = paper.notes.filter_by(user=current_user).first()
         
-        if paper.pdf_link:
-            if note:
-                return str(note.id)
-            else:
-                return "exist_paper_pdf"
+        if note:
+            return jsonify({"code": "exist_note",
+                            "paper_id": paper_id,
+                            "paper_pdf_link_online": paper.pdf_link_online,
+                            "paper_pdf_link": paper.pdf_link,
+                            "other_info": str(note.id)})
         else:
-            bib_dict = download(paper_id, download_pdf)
-            if "pdf_path" in bib_dict.keys():
-                paper.pdf_link = bib_dict['pdf_path']
-                db.session.add(paper)
-                db.session.commit()
-            if note:
-                return str(note.id)
-            else:
-                return "exist_paper_not_pdf"
-    
-        # if note:
-        #     return str(note.id)
-        # else:
-        #     if paper.pdf_link:
-        #         print("")
-        #         return "exist_paper_pdf"
-        #     else:
-        #         bib_dict = download(paper_id, download_pdf)
-        #         if "pdf_path" in bib_dict.keys():
-        #             paper.pdf_link = bib_dict['pdf_path']
-        #             db.session.add(paper)
-        #             db.session.commit()
-        #         return "exist_paper_not_pdf"
+            return jsonify({"code": "exist_paper",
+                            "paper_id": paper_id,
+                            "paper_pdf_link_online": paper.pdf_link_online,
+                            "paper_pdf_link": paper.pdf_link,
+                            "other_info": ""})
     else:
-        bib_dict = download(paper_id, download_pdf)
-        # insert paper
-        split_date = bib_dict['year'].split('-')
-        if len(split_date) > 1:
-            date_ = datetime.datetime(int(split_date[0]), int(split_date[1]), 1)
-        else:
-            date_ = datetime.datetime(int(split_date[0]), 1, 1)
-        if "pdf_path" in bib_dict.keys():
+        try:
+            bib_dict = get_paper_info_from_paperid(paper_id)
+            split_date = bib_dict['year'].split('-')
+            if len(split_date) > 1:
+                date_ = datetime.datetime(int(split_date[0]), int(split_date[1]), 1)
+            else:
+                date_ = datetime.datetime(int(split_date[0]), 1, 1)
+            
             paper_ = Paper(title=bib_dict['title'], journal=bib_dict['journal'],
                         paper_link=bib_dict["url"], paper_id=paper_id,
-                        pdf_link=bib_dict['pdf_path'], date=date_)
+                        pdf_link_online=bib_dict['pdf_link'], date=date_)
+            paper_.insert()
+            
+            return jsonify({"code": "addpaper",
+                    "paper_id": paper_.paper_id,
+                    "paper_pdf_link_online": paper_.pdf_link_online,
+                    "paper_pdf_link": paper_.pdf_link,
+                    "other_info": ""})
+        except:
+            return jsonify({"code": "addpaper_failed"})
+
+
+@main.route('/addpdf', methods=["GET", "POST"])
+def add_pdf():
+    paper_id = request.form.get('paperId')
+    
+    paper = Paper.query.filter_by(paper_id=paper_id).first()
+    if paper:
+        note = paper.notes.filter_by(user=current_user).first()
+        pdf_link = "_".join(paper.title.split(" ")) + ".pdf"
+        pdf_link = "app" + os.path.join(url_for("static", filename="pdf"), pdf_link)
+        if not os.path.exists(pdf_link):
+            get_paper_pdf_from_paperid(paper_id, pdf_link, direct_url=paper.pdf_link_online)
+            if os.path.exists(pdf_link):
+                paper.insert_pdf_link(pdf_link)
+                if note:
+                    return jsonify({"code": "exist_note",
+                                    "paper": "exist", 
+                                    "pdf": "add", 
+                                    "other_info": str(note.id)})
+                else:
+                    return jsonify({"code": "not_note",
+                                    "paper": "exist", 
+                                    "pdf": "add"})
+            else:
+                if note:
+                    return jsonify({"code": "exist_note",
+                                    "paper": "exist", 
+                                    "pdf": "failed",
+                                    "other_info": str(note.id)})
+                else:
+                    return jsonify({"code": "not_note",
+                                    "paper": "exist", 
+                                    "pdf": "failed"})
         else:
+            paper.insert_pdf_link(pdf_link)
+            if note:
+                return jsonify({"code": "exist_note",
+                                "paper": "exist", 
+                                "pdf": "exist",
+                                "other_info": str(note.id)})
+            else:
+                return jsonify({"code": "not_note",
+                                "paper": "exist", 
+                                "pdf": "exist"})
+    else:
+        try:
+            bib_dict = get_paper_info_from_paperid(paper_id)
+            split_date = bib_dict['year'].split('-')
+            if len(split_date) > 1:
+                date_ = datetime.datetime(int(split_date[0]), int(split_date[1]), 1)
+            else:
+                date_ = datetime.datetime(int(split_date[0]), 1, 1)
+                            
             paper_ = Paper(title=bib_dict['title'], journal=bib_dict['journal'],
-                        paper_link=bib_dict["url"], paper_id=paper_id, date=date_)
-        db.session.add(paper_)
-        db.session.commit()
-        
-        return "addpaper"
+                        paper_link=bib_dict["url"], paper_id=paper_id,
+                        pdf_link_online=bib_dict['pdf_link'], date=date_)
+            paper_.insert()
+            
+            pdf_link = "_".join(paper.title.split(" ")) + ".pdf"
+            pdf_link = "app" + os.path.join(url_for("static", filename="pdf"), pdf_link)
+            get_paper_pdf_from_paperid(paper_id, pdf_link, direct_url=paper.pdf_link_online)
+            if os.path.exists(pdf_link):
+                paper_.insert_pdf_link(pdf_link)
+                code_ = "add"
+            else:
+                code_ = "failed"
+            
+            return jsonify({"code": "not_note",
+                            "paper": "add", 
+                            "pdf": code_})
+        except:
+            return jsonify({"code": "not_note",
+                            "paper": "failed", 
+                            "pdf": "failed"})
+
+                
+
     
 @main.route('/pdf/<pdf_name>')
 def pdf_view(pdf_name):
     return render_template('pdf_view.html', pdf_name=pdf_name)
 ##################################
+
+@main.route('/hand_addpaper', methods=["GET", "POST"])
+def hand_addpaper():
+    title = request.form.get('title')
+    journal = request.form.get('journal')
+    paper_link = request.form.get('paper_link')
+    paper_id = request.form.get('paper_id')
+    # athours = request.form.get('Athours')
+    pdf_link_online = request.form.get('pdf_link_online')
+    # pdf_link_paper = request.form.get('pdf_link')
+    date_ = request.form.get('Date')
+    
+    paper = Paper.query.filter_by(paper_id=paper_id).first()
+    if not paper:
+        if date_:
+            date_ = date_.split("-")
+            date_ = datetime.datetime(int(date_[0]), int(date_[1]), int(date_[2]))
+        else:
+            date_ = datetime.datetime.utcnow()
+        
+        pdf_name = title + '.pdf'
+        pdf_path = "app" + os.path.join(url_for("static", filename="pdf"), pdf_name)
+        if pdf_link_online:
+            
+            paper = Paper(title=title, journal=journal, paper_link=paper_link,
+                    paper_id=paper_id, pdf_link_online=pdf_link_online,
+                    date=date_)
+            paper.insert()
+            get_paper_pdf_from_paperid(paper_id, pdf_path, pdf_link_online)
+        else:
+            paper = Paper(title=title, journal=journal, paper_link=paper_link,
+                    paper_id=paper_id, date=date_)
+            paper.insert()
+        
+        if os.path.exists(pdf_path):
+            paper.insert_pdf_link(pdf_path)
+            code = "add"
+        else:
+            code = "notadd"
+        
+        return jsonify({
+            "pdf":code,
+            "paper": "add"
+        })
+    else:
+        pdf_name = title + '.pdf'
+        pdf_path = "app" + os.path.join(url_for("static", filename="pdf"), pdf_name)
+        if pdf_link_online:
+            get_paper_pdf_from_paperid(paper_id, pdf_path, pdf_link_online)
+    
+        if os.path.exists(pdf_path):
+            paper.insert_pdf_link(pdf_path)
+            code = "add"
+        else:
+            code = "notadd"
+            
+        return jsonify({
+            "pdf":code,
+            "paper": "add"
+        })
+            

@@ -5,159 +5,139 @@
 {% block scripts %}
 {{ super() }}
 <script type="text/javascript" src="{{ url_for('static', filename='js/bootbox.min.js') }}"></script>
-<script type="text/javascript" src="{{ url_for('static', filename='ue/ueditor.config.js') }}"></script>
-<script type="text/javascript" src="{{ url_for('static', filename='ue/ueditor.all.js') }}"></script>
-<script type="text/javascript">
-    var ue = UE.getEditor('content', {
-        serverUrl: '/ueditor'
-    });
+<!-- editor.md: create it -->
+<link rel="stylesheet" href="{{ url_for('static', filename='editor.md/css/editormd.min.css')}}" />
+<!-- <script src="{{ url_for('static', filename='js/jquery.min.js')}}"></script> -->
+<script src="{{ url_for('static', filename='editor.md/editormd.min.js')}}"></script>
+<script>
+// 接收后端传来的数据供单独的JS程序使用
+var editorLibPath = "{{ url_for('static', filename='editor.md/lib/') }}";
+var noteId = '{{ note.id}}';
+var noteType = '{{ note.intensive_reading | safe }}';
+var noteLabel = '{{ label }}'
+var paper_title = '{{ paper.title }}'
+var paper_id = '{{ paper.paper_id }}'
+var paper_journal = '{{ paper.journal }}'
+var paper_link = '{{ paper.paper_link }}'
+var paper_date = '{{ paper.date | safe }}'
+var paper_pdf_link = '{{ paper.pdf_link }}'
 </script>
-
-<script type="text/javascript">
-    function doUserPost() {
-        var postid = '{{ post.id }}';
-        var headline = $.trim($("#headline").val());
-        var labels = $.trim($("#myLabels").val())
-        var contentPlain = UE.getEditor("content").getContentTxt();
-
-        if (headline.length < 1) {
-            bootbox.alert({title:"错误提示", message:"标题不能少于1个字"});
-            return false;
-        }
-        else if (contentPlain.length < 10) {
-            bootbox.alert({title:"错误提示", message:"内容不能低于10个字"});
-            return false;
-        }
-
-        // 发送请求时，带上postid
-        var param = "headline=" + headline;
-        param += "&content=" + encodeURIComponent(UE.getEditor("content").getContent());
-        param += "&intensive=" + $("#type").val();
-        param += "&drafted=0";
-        param += "&postid=" + postid;
-        param += "&labels=" + labels;
-        $.post('/addnote', param, function (data) {
-             if (data == "intensive" || data == "skimming") {
-                bootbox.alert({title:"信息提示", message:"发布成功."});
-                setTimeout(function () {
-                    // 跳转到文章首页
-                    location.href = '/' + data;
-                }, 1000);
-            }
-            else {
-                bootbox.alert({title:"错误提示", message:"发布失败."});
-            }
-        });
-    }
-</script>
-
-<script type="text/javascript">
-    function downloadMeta() {
-        var DoiArxivId = $.trim($("#headline").val());
-        if (DoiArxivId.length < 1) {
-            bootbox.alert({title:"错误提示", message:"表单未填文献ID编号"});
-            return false;
-        }
-        // 发送请求内容
-        var param = "DoiArxivId=" + DoiArxivId;
-        param += "&pdf=0";
-        $.post('/addpaper', param, function (data) {
-            if (data == "addpaper") {
-                bootbox.alert({title: "信息提示", message: "文献Meta信息下载成功"});
-            }
-            else if (data == "exist_paper_pdf" | data == "exist_paper_not_pdf") {
-                bootbox.alert({title: "信息提示", message: "文献Meta信息已存在"});
-            }
-            else {
-                bootbox.alert({title: "信息提示", message: "相关笔记已存在"});
-                setTimeout(function () {
-                    // 跳转到文章首页
-                    location.href = '/prenote?id=' + data;
-                }, 1000);
-            }
-        });
-    }
-</script>
-
-<script type="text/javascript">
-    function downloadPdf() {
-        var DoiArxivId = $.trim($("#headline").val());
-        if (DoiArxivId.length < 1) {
-            bootbox.alert({title:"错误提示", message:"表单未填文献ID编号"});
-            return false;
-        }
-        // 发送请求内容
-        var param = "DoiArxivId=" + DoiArxivId;
-        param += "&pdf=1";
-        $.post('/addpaper', param, function (data) {
-            if (data == "addpaper") {
-                bootbox.alert({title: "信息提示", message: "文献PDF信息下载成功"});
-            }
-            else if (data == "exist_paper_pdf") {
-                bootbox.alert({title: "信息提示", message: "文献PDF信息已经存在"});
-            }
-            else if (data == "exist_paper_not_pdf") {
-                bootbox.alert({title: "信息提示", message: "文献Meta信息已存在,PDF下载失败"});
-            }
-            else {
-                bootbox.alert({title: "信息提示", message: "相关笔记已存在"});
-                setTimeout(function () {
-                    // 跳转到文章首页
-                    location.href = '/prenote?id=' + data;
-                }, 1000);
-            }
-        });
-    }
-</script>
+<script src="{{ url_for('static', filename='js/prepare.note.js')}}"></script>
 {% endblock %}
 
 {% block page_content %}
-<div class="container" style="margin-top: 20px; background-color: white; padding: 20px;">
-    <div class="row form-group">
-        <label for="headline" class="col-md-1">文献</label>
-        {% if post %}
-        <input type="text" class="col-md-6" id="headline" value="{{ post.paper.paper_id }}"/>
-        {% else %}
-        <input type="text" class="col-md-6" id="headline" placeholder="DOI or Arxiv ID"/>
-        {% endif %}
-        <div class="col-md-2">
-            <button class="form-control btn-primary" onclick="downloadMeta()">下载Meta</button>
-        </div>
-        <div class="col-md-1"></div>
-        <div class="col-md-2">
-            <button class="form-control btn-primary" onclick="downloadPdf()">下载Meta&PDF</button>
-        </div>
-    </div>
-    <div class="row">
-        <script id="content" name="content" type="text/plain">
-        {% if post %}{{ post.content | safe }}{% endif %}
-        </script>
-    </div>
-    <div class="row form-group">
-        <label for="labels" class="col-md-1">笔记标签</label>
-        {% if post %}
-        <input type="text" class="col-md-11" id="myLabels" 
-        value="{% for label in post.labels.all() %}{{ label.name }};{% endfor %}"/>
-        {% else %}
-        <input type="text" class="col-md-11" id="myLabels" placeholder="请用英文';'分割不同标签"/>
-        {% endif %}
-    </div>
+<div class="input-group">
+    <span class="input-group-addon">文献:</span>
+    {% if note %}
+    <input type="text" class="form-control" id="headline" value="{{ note.paper.paper_id }}">
+    {% else %}
+    <input type="text" class="form-control" id="headline">
+    {% endif %}
+    <span class="input-group-btn">
+        <button class="btn" type="button" name="downloadPaper" value="meta">下载Meta</button>
+        <button class="btn btn-warning" type="button" name="downloadPDF" value="metaAndPdf">下载Meta和PDF</button>
+        <button class="btn btn-info" type="button" name="hand_download" data-toggle="modal" data-target="#handDownload">手动下载</button>
+        <button class="btn btn-success" type="button" data-toggle="modal" data-target="#releaseModal" id="releaseModal_">
+            发表笔记
+        </button>
+    </span>
+</div>
 
-    <div class="row form-group" style="margin-top: 20px; padding-top: 10px;">
-        <label for="type" class="col-md-1">类型:</label>
-        <div class="col-md-2">
-            <select class="form-control" id="type">
-                <option value="1">精读</option>
-                <option value="2">略读</option>
-            </select>
+<div id="editor">
+    <!-- Tips: Editor.md can auto append a `<textarea>` tag -->
+    {% if note %}
+    <textarea style="display:none;">{{ note.content }}</textarea>
+    {% else %}
+    <textarea style="display:none;"></textarea>
+    {% endif %}
+</div>
+
+<div class="modal fade" id="releaseModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title">发表笔记</h4>
+          <!-- <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button> -->
         </div>
-        
-        <label class="col-md-4"></label>
-        
-        <label class="col-md-1"></label>
-        <div class="col-md-2">
-            <button class="form-control btn-primary" onclick="doUserPost()">发布文章</button>
+        <div class="modal-body">
+            <form class="form-inline">
+                <div class="form-group">
+                    <label>笔记类型:</label>
+                    <input type="radio" name="noteType" value="intensive"> 精读 </input>
+                    <input type="radio" name="noteType" value="skimming"> 略读 </input>
+                </div>
+            </form>  
+            <!-- Lab -->
+            <form class="form-inline">
+                <div class="form-group">
+                    <label>笔记标签:</label>
+                    <input type="text" id="myLabels" placeholder="请使用英文分号(;)隔开标签"></input>
+                </div>
+            </form>  
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+          <button type="button" class="btn btn-primary" id="releaseNote">发表</button>
+        </div>
+      </div>
+    </div>
+</div>
+
+<div class="modal fade" id="handDownload" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form class="form-horizontal" role="form" id="form_paper_data" style="margin: 20px;"></form>
+                <div class="modal-header">
+                    <button type="button" class="close cancelForm" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title">手动添加文献</h4>
+                </div>
+                <div class="modal-body">
+                    <form class="form-horizontal" role="form">
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">Title</label>
+                            <div class="col-sm-9"><input type="text" class="form-control" id="title" placeholder="必填"></div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">Paper ID</label>
+                            <div class="col-sm-9"> <input type="text" class="form-control" id="paper_id" placeholder="必填:需要和note进行关联,保持和note标题一致"></div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">Athours</label>
+                            <div class="col-sm-9"> <input type="text" class="form-control" id="athours" placeholder="选填"></div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">Journal</label>
+                            <div class="col-sm-9"> <input type="text" class="form-control" id="journal" placeholder="必填"></div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">Date</label>
+                            <div class="col-sm-9"> <input type="text" class="form-control" id="date" placeholder="选填:年月日都要有,e.g. 2022-11-23"></div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">Paper Link</label>
+                            <div class="col-sm-9"> <input type="text" class="form-control" id="paper_link" placeholder="必填:文献主页"></div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">PDF Link Online</label>
+                            <div class="col-sm-9"> <input type="text" class="form-control" id="pdf_link_online" placeholder="选填:下载pdf的地址,更新pdf文件"></div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">PDF Link</label>
+                            <div class="col-sm-9"> <input type="text" class="form-control" id="pdf_link" placeholder="选填"></div>
+                        </div>
+                    </form>
+                </div>
+            </form>
+            <div class="modal-footer">
+                <!-- 两个按钮含一样，主要是要表单里的内容 -->
+                <button type="button" class="btn btn-default cancelForm" data-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-primary" data-dismiss="modal" id="handDownloadPaper">提交</button>
+            </div>
         </div>
     </div>
 </div>
+
+
 {% endblock %}

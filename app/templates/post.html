@@ -2,19 +2,26 @@
 {% import "_macros.html" as macros %}
 
 {% block page_content %}
-{% for idea in ideas %}
+{% for post in posts %}
 <div class="row">
     <div class="col-md-12 row note-list">
         <div class="col-md-12 detail">
-            <div class="title"><strong>{{ idea.title }}</strong></div>
+            <div class="title"><strong>{{ post.title }}</strong></div>
             <div class="intro">
-                {{ idea.content | safe }}
+                <!-- Server-side output Markdown text -->
+                <!-- <div id="markdown-view">
+                    <textarea style="display:none;">
+                        {{ post.content_md | safe }}
+                    </textarea>             
+                </div> -->
+                <!-- {{ post.content }} -->
+                {{ post.content_html | safe}}
             </div>
             <div class="info">
                 <div class="pull-right">
-                    <a href="{{ url_for('main.del_post') }}?id={{ idea.id }}">删除</a>
+                    <a href="{{ url_for('main.del_post') }}?id={{ post.id }}">删除</a>
                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                    <a href="{{ url_for('main.pre_post') }}?id={{ idea.id }}">继续编辑</a>
+                    <a href="{{ url_for('main.pre_post') }}?id={{ post.id }}">继续编辑</a>
                 </div>   
             </div>
         </div>
@@ -22,13 +29,13 @@
 </div>
 {% endfor %}
 
-{% if ideas %}
+{% if posts %}
 {% if pagination %}
 <div class="pagination">
-    {% if ideas[0].idea %}
-    {{ macros.pagination_widget(pagination, "main.idea", fragment='', id=ideas[0].id) }}
-    {% else %}
-    {{ macros.pagination_widget(pagination, "main.conclusion", fragment='', id=ideas[0].id) }}
+    {% if posts[0].post_type == "idea" %}
+    {{ macros.pagination_widget(pagination, "main.idea", fragment='', id=posts[0].id) }}
+    {% else %} 
+    {{ macros.pagination_widget(pagination, "main.conclusion", fragment='', id=posts[0].id) }}
     {% endif %}
 </div>
 {% endif %}

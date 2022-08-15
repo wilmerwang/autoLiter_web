@@ -23,7 +23,11 @@
                 <div class="pull-left">
                     标签: {% for label in intensive.labels.all() %} <a href="{{ url_for('main.label', name=label.name) }}">{{ label.name }}</a>;{% endfor %}
                 </div>
-                <div class="pull-right"><a href="{{ url_for('main.pre_note') }}?id={{ intensive.id }}">继续编辑</a></div>   
+                <div class="pull-right">
+                    <a href="{{ url_for('main.del_note') }}?id={{ intensive.id }}">删除</a>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <a href="{{ url_for('main.pre_note') }}?id={{ intensive.id }}">继续编辑</a>
+                </div>   
             </div>
         </div>
     </div>
@@ -49,7 +53,11 @@
                 <div class="pull-left">
                     标签: {% for label in skimming.labels.all() %} <a href="{{ url_for('main.label', name=label.name) }}">{{ label.name }}</a>; {% endfor %}
                 </div>
-                <div class="pull-right"><a href="{{ url_for('main.pre_note') }}?id={{ skimming.id }}">继续编辑</a></div>   
+                <div class="pull-right">
+                    <a href="{{ url_for('main.del_note') }}?id={{ skimming.id }}">删除</a>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <a href="{{ url_for('main.pre_note') }}?id={{ skimming.id }}">继续编辑</a>
+                </div>   
             </div>
         </div>
     </div>
@@ -67,7 +75,11 @@
                 {{ conclusion.content | safe }}
             </div>
             <div class="info">
-                <div class="pull-right"><a href="{{ url_for('main.pre_post') }}?id={{ conclusion.id }}">继续编辑</a></div>   
+                <div class="pull-right">
+                    <a href="{{ url_for('main.del_post') }}?id={{ conclusion.id }}">删除</a>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <a href="{{ url_for('main.pre_post') }}?id={{ conclusion.id }}">继续编辑</a>
+                </div>   
             </div>
         </div>
     </div>
@@ -84,7 +96,11 @@
                 {{ idea.content | safe }}
             </div>
             <div class="info">
-                <div class="pull-right"><a href="{{ url_for('main.pre_post') }}?id={{ idea.id }}">继续编辑</a></div>   
+                <div class="pull-right">
+                    <a href="{{ url_for('main.del_post') }}?id={{ idea.id }}">删除</a>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <a href="{{ url_for('main.pre_post') }}?id={{ idea.id }}">继续编辑</a>
+                </div>   
             </div>
         </div>
     </div>

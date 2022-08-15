@@ -5,82 +5,69 @@
 {% block scripts %}
 {{ super() }}
 <script type="text/javascript" src="{{ url_for('static', filename='js/bootbox.min.js') }}"></script>
-<script type="text/javascript" src="{{ url_for('static', filename='ue/ueditor.config.js') }}"></script>
-<script type="text/javascript" src="{{ url_for('static', filename='ue/ueditor.all.js') }}"></script>
+<!-- editor.md: create it -->
+<link rel="stylesheet" href="{{ url_for('static', filename='editor.md/css/editormd.min.css')}}" />
+<!-- <script src="{{ url_for('static', filename='js/jquery.min.js')}}"></script> -->
+<script type="text/javascript" src="{{ url_for('static', filename='editor.md/editormd.min.js')}}"></script>
 <script type="text/javascript">
-    var ue = UE.getEditor('content', {
-        serverUrl: '/ueditor'
-    });
+  // 接收后端传来的数据供单独的JS程序使用
+  var editorLibPath = "{{ url_for('static', filename='editor.md/lib/') }}"
+  var postId = '{{ post.id }}';
+  var postType = '{{ post.post_type }}';
 </script>
-
-<script type="text/javascript">
-    function doUserPost() {
-        var postid = '{{ post.id }}';
-        var headline = $.trim($("#headline").val());
-        var contentPlain = UE.getEditor("content").getContentTxt();
-
-        if (headline.length < 1) {
-            bootbox.alert({title:"错误提示", message:"标题不能少于1个字"});
-            return false;
-        }
-        else if (contentPlain.length < 10) {
-            bootbox.alert({title:"错误提示", message:"内容不能低于10个字"});
-            return false;
-        }
-
-        // 发送请求时，带上postid
-        var param = "headline=" + headline;
-        param += "&content=" + encodeURIComponent(UE.getEditor("content").getContent());
-        param += "&idea=" + $("#type").val();
-        param += "&drafted=0";
-        param += "&postid=" + postid;
-        $.post('/addpost', param, function (data) {
-             if (data == "conclusion" || data == "idea") {
-                bootbox.alert({title:"信息提示", message:"发布成功."});
-                setTimeout(function () {
-                    // 跳转到文章首页
-                    location.href = '/' + data;
-                }, 1000);
-            }
-            else {
-                bootbox.alert({title:"错误提示", message:"发布失败."});
-            }
-        });
-    }
-</script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/prepare.post.js')}}"></script>
 {% endblock %}
 
 {% block page_content %}
-<div class="container" style="margin-top: 20px; background-color: white; padding: 20px;">
-    <div class="row form-group">
-        <label for="headline" class="col-md-1">文章标题</label>
-        {% if post %}
-        <input type="text" class="col-md-11" id="headline" value="{{ post.title }}"/>
-        {% else %}
-        <input type="text" class="col-md-11" id="headline"/>
-        {% endif %}
-    </div>
-    <div class="row">
-        <script id="content" name="content" type="text/plain">
-        {% if post %}{{ post.content | safe }}{% endif %}
-        </script>
-    </div>
+<div class="input-group">
+    <span class="input-group-addon">标题:</span>
+    {% if post %}
+    <input type="text" class="form-control" id="headline" value="{{ post.title }}">
+    {% else %}
+    <input type="text" class="form-control" id="headline">
+    {% endif %}
+    <span class="input-group-btn">
+        <button class="btn btn-success" type="button" data-toggle="modal" data-target="#releaseModal" id="modalWindow">
+            发表文章
+        </button>
+    </span>
+</div>
 
-    <div class="row form-group" style="margin-top: 20px; padding-top: 10px;">
-        <label for="type" class="col-md-1">类型:</label>
-        <div class="col-md-2">
-            <select class="form-control" id="type">
-                <option value="1">总结</option>
-                <option value="2">想法</option>
-            </select>
+<div id="editor">
+    <!-- Tips: Editor.md can auto append a `<textarea>` tag -->
+    {% if post %}
+    <textarea style="display:none;">{{ post.content }}</textarea>
+    {% else %}
+    <textarea style="display:none;"></textarea>
+    {% endif %}
+</div>
+
+<div class="modal fade" id="releaseModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title" id="exampleModalCenterTitle">发表文章</h4>
+          <!-- <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button> -->
         </div>
-        
-        <label class="col-md-4"></label>
-        
-        <label class="col-md-1"></label>
-        <div class="col-md-2">
-            <button class="form-control btn-primary" onclick="doUserPost()">发布文章</button>
+        <div class="modal-body">
+            <form class="form-inline">
+                <div class="form-group">
+                    <label>文章类型:</label>
+                    <input type="radio" name="postType" value="idea"> 想法 </input>
+                    <input type="radio" name="postType" value="conclusion"> 总结 </input>
+                </div>
+            </form>  
         </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+          <button type="button" class="btn btn-primary" id="releasePost">发表</button>
+        </div>
+      </div>
     </div>
 </div>
+  
+
+
 {% endblock %}
