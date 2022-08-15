@@ -440,7 +440,7 @@ def hand_addpaper():
 @main.route('/tags')
 def tags():
     label_objs = []
-    notes = Note.query.all()
+    notes = current_user.notes.all()
     for note in notes:
         label_objs.extend(note.labels.all())
     
