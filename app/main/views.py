@@ -135,6 +135,8 @@ def add_post():
     postid = request.form.get('postid')
     post_type = request.form.get('post_type')
     
+    logger.info(content_html)
+    
     user = current_user
     if not postid:
         # insert 
@@ -155,12 +157,18 @@ def pre_note():
     if id == None:
         return render_template('pre_note.html', note=None, label=None, paper=None)
     else:
-        note = Note.query.get(int(id))
-        paper = note.paper
-        labels = [i.name for i in note.labels.all()]
-        labels = ';'.join(labels)
-        return render_template('pre_note.html', note=note, label=labels, paper=paper)
-    
+        try:
+            note = Note.query.get(int(id))
+            if note.user == current_user:
+                paper = note.paper
+                labels = [i.name for i in note.labels.all()]
+                labels = ';'.join(labels)
+                return render_template('pre_note.html', note=note, label=labels, paper=paper)
+            else: 
+                return render_template('pre_note.html', note=None, label=None, paper=None)
+        except:
+            return render_template('pre_note.html', note=None, label=None, paper=None)
+        
     
 @main.route('/addnote', methods=['POST'])
 def add_note():
@@ -202,7 +210,7 @@ def add_note():
         for i in post.labels.all(): 
             post.labels.remove(i)
         post.labels.extend(labels_sql)
-        post.modified(content=content_md, content_html=content_html, intensive=intensive, user=user)
+        post.modified(content=content_md, content_html=content_html, intensive=intensive)
 
     return note_type
     
@@ -450,3 +458,29 @@ def tags():
         label_count_dict[label] = label_count_dict.get(label, 0) + 1
         
     return render_template('tag.html', label_count=label_count_dict)
+
+@main.route('/upload',methods=['POST'])
+def upload():
+    file=request.files.get('editormd-image-file')
+    if not file:
+        res={
+            'success':0,
+            'message':'上传失败'
+        }
+    else:
+        try:
+            ex=os.path.splitext(file.filename)[1]
+            filename=datetime.datetime.now().strftime('%Y%m%d%H%M%S')+ex
+            file_path = 'app' + url_for('static', filename='images') + "/" + filename
+            file.save(file_path)
+            res={
+                'success':1,
+                'message':'上传成功',
+                'url':file_path.split("/", 1)[-1]
+            }
+        except:
+            res={
+            'success':0,
+            'message':'上传失败'
+            }
+    return jsonify(res)

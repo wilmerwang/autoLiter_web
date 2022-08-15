@@ -12,6 +12,7 @@
 <script type="text/javascript">
   // 接收后端传来的数据供单独的JS程序使用
   var editorLibPath = "{{ url_for('static', filename='editor.md/lib/') }}"
+  var imageUploadURL = "{{ url_for('main.upload') }}"
   var postId = '{{ post.id }}';
   var postType = '{{ post.post_type }}';
 </script>

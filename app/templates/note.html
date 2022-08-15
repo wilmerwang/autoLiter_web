@@ -1,6 +1,47 @@
 {% extends "base.html"%}
 {% import "_macros.html" as macros %}
 
+{% block styles %}
+{{super()}}
+<style>
+img {
+    max-width: 60%;
+    max-height: 100%;
+    display: block;
+    /* text-align: center; */
+    margin:0 auto;
+    }
+
+table {
+    font-family: verdana,arial,sans-serif;
+    font-size:13px;
+    color:#333333;
+    border-width: 1px;
+    border-color: #666666;
+    border-collapse: collapse;
+    margin:0 auto;
+    text-align: center;
+    }
+table th {
+    border-width: 1px;
+    padding: 8px;
+    border-style: solid;
+    border-color: #666666;
+    background-color: #dedede;
+    text-align: center;
+}
+table td {
+    border-width: 1px;
+    padding: 8px;
+    border-style: solid;
+    border-color: #666666;
+    background-color: #ffffff;
+    text-align: center;
+}
+
+</style>
+{% endblock %}
+
 {% block page_content %}
 
 {% for note in notes %}

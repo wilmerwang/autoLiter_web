@@ -22,6 +22,7 @@ var paper_link = '{{ paper.paper_link }}'
 var paper_date = '{{ paper.date | safe }}'
 var paper_pdf_link = '{{ paper.pdf_link }}'
 var paper_pdf_link_online = '{{ paper.pdf_link_online }}'
+var imageUploadURL = "{{ url_for('main.upload') }}"
 </script>
 <script src="{{ url_for('static', filename='js/prepare.note.js')}}"></script>
 {% endblock %}

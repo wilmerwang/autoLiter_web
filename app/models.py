@@ -99,8 +99,9 @@ class Note(db.Model):
     def modified(self, **kwargs):
         self.intensive_reading = kwargs["intensive"]
         self.content = kwargs["content"]
+        self.content_html = kwargs["content_html"]
         self.time_modify = datetime.utcnow()
-        self.user = kwargs['user']
+        # self.user = kwargs['user']
         db.session.add(self)
         db.session.commit()
     
@@ -140,8 +141,9 @@ class Post(db.Model):
         self.post_type = kwargs["post_type"]
         self.title = kwargs["title"] 
         self.content = kwargs["content"]
+        self.content_html = kwargs["content_html"]
         self.time_modify = datetime.utcnow()
-        self.user = kwargs['user']
+        # self.user = kwargs['user']
         db.session.add(self)
         db.session.commit()
     

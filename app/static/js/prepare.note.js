@@ -4,13 +4,14 @@ $(function() {
         height: 600, //"100%",
         // markdown: "xxxx",     // dynamic set Markdown text
         path : editorLibPath, //"{{ url_for('static', filename='editor.md/lib/') }}",  // Autoload modules mode, codemirror, marked... dependents libs path
-        // saveHTMLToTextarea : true, 
+        saveHTMLToTextarea : true, 
         watch: true,
         taskList: true,
         // emoji: true,
         tex: true,
         flowChart: true,
         sequenceDiagram: true,
+        htmlDecode: "style,iframe,sub,sup",
         toolbarIcons : function() {
             return [
                 "undo", "redo", "|",
@@ -20,9 +21,9 @@ $(function() {
                 "help"
         ]
         },
-        // imageUpload    : true,
-        // imageFormats   : ["jpg", "jpeg", "gif", "png", "bmp", "webp"],
-        // imageUploadURL : "{{ url_for('static', filename='editor.md/examples/php/upload.php') }}",
+        imageUpload    : true,
+        imageFormats   : ["jpg", "jpeg", "gif", "png", "bmp", "webp"],
+        imageUploadURL : imageUploadURL,
     });
 
     $("#releaseNote").click(function() {
