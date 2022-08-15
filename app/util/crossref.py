@@ -41,7 +41,10 @@ class crossrefInfo(object):
         pub_date = [str(i) for i in bib['published']["date-parts"][0]]
         pub_date = '-'.join(pub_date)
 
-        authors = ' and '.join([i["family"]+" "+i['given'] for i in bib['author'] if "family" and "given" in i.keys()])
+        if 'author' in bib.keys():
+            authors = ' and '.join([i["family"]+" "+i['given'] for i in bib['author'] if "family" and "given" in i.keys()])
+        else:
+            authors = "No author"
 
         if 'short-container-title' in bib.keys():
             journal = bib['short-container-title'][0]
@@ -139,15 +142,16 @@ class crossrefInfo(object):
 if __name__ == "__main__":
     # doi = "10.1016/j.wneu.2012.11.074"
     # doi = "10.1093/cercor/bhac266"
+    doi = "10.1038/s41467-022-29269-6"
     # title = "Heterogeneous Graph Attention Network"
-    title = "Learning to Copy Coherent Knowledge for Response Generation"
+    # title = "Learning to Copy Coherent Knowledge for Response Generation"
     
     crossref_info = crossrefInfo()
     crossref_info.set_proxy(proxy="127.0.1:1123")
     
-    # bib_doi = crossref_info.get_info_by_doi(doi)
-    bib_title = crossref_info.get_info_by_title(title)
+    bib_doi = crossref_info.get_info_by_doi(doi)
+    # bib_title = crossref_info.get_info_by_title(title)
     
-    # print(bib_doi)
+    print(bib_doi)
     print("\n")
-    print(bib_title)
+    # print(bib_title)
