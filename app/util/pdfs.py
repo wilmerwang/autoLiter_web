@@ -5,7 +5,7 @@ from urllib.parse import urlunsplit, urlsplit
 from bs4 import BeautifulSoup
 
 logging.basicConfig()
-logger = logging.getLogger('arxiv')
+logger = logging.getLogger('PDFs')
 logger.setLevel(logging.DEBUG)
 HEADERS = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:27.0) Gecko/20100101 Firefox/27.0'}
 
@@ -98,10 +98,10 @@ class pdfDownload(object):
                         pdf_url = urlunsplit(('https', url_parts[1], url_parts[2], '', ''))
                 else:
                     pdf_url = urlunsplit(('https', urlsplit(base_url)[1], url_parts[2], '', ''))
+                    
+                return self.fetch(pdf_url, auth)
             except:
-                pass 
-
-            return self.fetch(pdf_url, auth)
+                pass
     
         logger.info("Failed to fetch pdf with all sci-hub urls")
 

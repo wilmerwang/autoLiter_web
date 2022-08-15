@@ -21,6 +21,7 @@ var paper_journal = '{{ paper.journal }}'
 var paper_link = '{{ paper.paper_link }}'
 var paper_date = '{{ paper.date | safe }}'
 var paper_pdf_link = '{{ paper.pdf_link }}'
+var paper_pdf_link_online = '{{ paper.pdf_link_online }}'
 </script>
 <script src="{{ url_for('static', filename='js/prepare.note.js')}}"></script>
 {% endblock %}
@@ -29,7 +30,7 @@ var paper_pdf_link = '{{ paper.pdf_link }}'
 <div class="input-group">
     <span class="input-group-addon">文献:</span>
     {% if note %}
-    <input type="text" class="form-control" id="headline" value="{{ note.paper.paper_id }}">
+    <input type="text" class="form-control" id="headline" value="{{ note.paper.paper_id }}" readonly>
     {% else %}
     <input type="text" class="form-control" id="headline">
     {% endif %}

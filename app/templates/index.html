@@ -5,31 +5,121 @@
 {% block styles %}
 {{super()}}
 <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/swiper.css') }}"/>
+<style type="text/css">
+    *{margin: 0; padding: 0;}
+        p{text-align: center;}
+        img{ width: 100%;
+            height: 100%;
+    }
+        .swiper-container{
+            width: 100%;
+            height: 600px;
+            margin:0 auto;
+        }
+        .swiper-button-next {
+        right: 20px;
+        left: auto;
+        }
+        .swiper-button-prev {
+        left: 20px;
+        right: auto;
+        }
+        /* css定义分页，导航按钮颜色 */
+        #case5{
+            --swiper-theme-color: #ff6600;
+            --swiper-pagination-color: #00ff33;/* 两种都可以 */
+        }
+        #case6 img,#case7 img{transform: scale(0.7);}
+        #case7{
+            width:auto;
+        }
+</style>
+{% endblock %}
+
+{% block scripts %}
+{{super()}}
+<script src="{{ url_for('static', filename='js/swiper.min.js') }}" type="text/javascript" charset="utf-8"></script>
+<script type="text/javascript">
+    var mySwiper = new Swiper('#case1', {
+        autoplay: true,//可选选项，自动滑动
+        initialSlide :1,//默认显示第二张图片索引从0开始
+        speed:2000,//设置过度时间
+        /* grabCursor: true,//鼠标样式根据浏览器不同而定 */
+            autoplay : {
+            delay:3000,
+            disableOnInteraction: false,
+            },                 /*  设置每隔3000毫秒切换 */
+            pagination: {
+                el: '.swiper-pagination',
+                clickable :true,
+            },
+            navigation: {
+                nextEl: '.swiper-button-next',
+                prevEl: '.swiper-button-prev',
+            },
+            scrollbar: {
+                el: '.swiper-scrollbar',
+                hide:true,
+            },
+    });
+</script>
 {% endblock %}
 
 
-{% block page_content %}
-<div id="clock">
-</div>
-<script src="{{ url_for('static', filename='js/radialIndicator.min.js') }}"></script>
-<script src="{{ url_for('static', filename='js/angular.radialIndicator.js') }}"></script>
-<script type="text/javascript">
-    var radialObj = radialIndicator('#clock', {
-        radius: 200,
-        barWidth: 40,
-        barColor: '#FF3968',
-        minValue: 0,
-        maxValue: 60,
-        fontWeight: 'normal',
-        roundCorner: true,
-        format: function (value) {
-            var date = new Date();
-            return date.getHours() + ':' + date.getMinutes();
-        }
-    });
 
-    setInterval(function () {
-        radialObj.value(new Date().getSeconds() + 1);
-    }, 1000);
-</script>
+{% block page_content %}
+<div class="swiper-container" id="case1">
+    <div class="swiper-wrapper">
+    <!-- <div class="swiper-slide"><img src="{{ url_for('static', filename='indexImage/0.jpeg') }}"></div> -->
+    <!-- <div class="swiper-slide"><img src="{{ url_for('static', filename='indexImage/1.jpeg') }}"></div> -->
+    <!-- <div class="swiper-slide"><img src="{{ url_for('static', filename='indexImage/2.jpeg') }}"></div> -->
+    <!-- <div class="swiper-slide"><img src="{{ url_for('static', filename='indexImage/3.jpeg') }}"></div> -->
+    <!-- <div class="swiper-slide"><img src="{{ url_for('static', filename='indexImage/4.jpeg') }}"></div> -->
+    <!-- <div class="swiper-slide"><img src="{{ url_for('static', filename='indexImage/5.jpeg') }}"></div> -->
+    <!-- <div class="swiper-slide"><img src="{{ url_for('static', filename='indexImage/6.jpeg') }}"></div> -->
+    <!-- <div class="swiper-slide"><img src="{{ url_for('static', filename='indexImage/7.jpeg') }}"></div> -->
+    <!-- <div class="swiper-slide"><img src="{{ url_for('static', filename='indexImage/8.jpeg') }}"></div> -->
+    <!-- <div class="swiper-slide"><img src="{{ url_for('static', filename='indexImage/9.jpeg') }}"></div> -->
+    <div class="swiper-slide"><img src="{{ url_for('static', filename='indexImage/10.jpeg') }}"></div>
+    <!-- <div class="swiper-slide"><img src="{{ url_for('static', filename='indexImage/11.jpeg') }}"></div> -->
+    <!-- <div class="swiper-slide"><img src="{{ url_for('static', filename='indexImage/12.jpeg') }}"></div>
+    <div class="swiper-slide"><img src="{{ url_for('static', filename='indexImage/13.jpeg') }}"></div>
+    <div class="swiper-slide"><img src="{{ url_for('static', filename='indexImage/14.jpeg') }}"></div>
+    <div class="swiper-slide"><img src="{{ url_for('static', filename='indexImage/15.jpeg') }}"></div>
+    <div class="swiper-slide"><img src="{{ url_for('static', filename='indexImage/16.jpeg') }}"></div>
+    <div class="swiper-slide"><img src="{{ url_for('static', filename='indexImage/17.jpeg') }}"></div>
+    <div class="swiper-slide"><img src="{{ url_for('static', filename='indexImage/18.jpeg') }}"></div>
+    <div class="swiper-slide"><img src="{{ url_for('static', filename='indexImage/19.jpeg') }}"></div>
+    <div class="swiper-slide"><img src="{{ url_for('static', filename='indexImage/20.jpeg') }}"></div>
+    <div class="swiper-slide"><img src="{{ url_for('static', filename='indexImage/21.jpeg') }}"></div>
+    <div class="swiper-slide"><img src="{{ url_for('static', filename='indexImage/22.jpeg') }}"></div>
+    <div class="swiper-slide"><img src="{{ url_for('static', filename='indexImage/23.jpeg') }}"></div> -->
+
+    <!-- <div class="swiper-slide"><img src="https://s2.loli.net/2022/08/15/yNTqIC63doQAwlu.jpg"></div>
+    <div class="swiper-slide"><img src="https://s2.loli.net/2022/08/15/pljGP3zANtLcWMU.jpg"></div>
+    <div class="swiper-slide"><img src="https://s2.loli.net/2022/08/15/jVK6q9sDyrE3JSO.jpg"></div>
+    <div class="swiper-slide"><img src="https://s2.loli.net/2022/08/15/uO37nUsRaqVjJAt.jpg"></div>
+    <div class="swiper-slide"><img src="https://s2.loli.net/2022/08/15/jgOUY6swV7npxkW.jpg"></div>
+    <div class="swiper-slide"><img src="https://s2.loli.net/2022/08/15/seOCicro8FMz6K3.jpg"></div>
+    <div class="swiper-slide"><img src="https://s2.loli.net/2022/08/15/cCYHQqgRDI6OuwB.jpg"></div>
+    <div class="swiper-slide"><img src="https://s2.loli.net/2022/08/15/JWL9ItlGsQPhg7B.jpg"></div>
+    <div class="swiper-slide"><img src="https://s2.loli.net/2022/08/15/YI6cCkwqnSZVQoH.jpg"></div>
+    <div class="swiper-slide"><img src="https://s2.loli.net/2022/08/15/LC78IAaGMHmZcEf.jpg"></div>
+    <div class="swiper-slide"><img src="https://s2.loli.net/2022/08/15/wdkRghsI9rMXG46.jpg"></div>
+    <div class="swiper-slide"><img src="https://s2.loli.net/2022/08/15/Mph9rVkfRSlIyNa.jpg"></div>
+    <div class="swiper-slide"><img src="https://s2.loli.net/2022/08/15/RWpfy7VsxiGmdjI.jpg"></div>
+    <div class="swiper-slide"><img src="https://s2.loli.net/2022/08/15/gkDQ1GBlvX3IxhC.jpg"></div>
+    <div class="swiper-slide"><img src="https://s2.loli.net/2022/08/15/BorFsGyYgMcA8Xa.jpg"></div>
+    <div class="swiper-slide"><img src="https://s2.loli.net/2022/08/15/ZfGK8Ym7l593bhn.jpg"></div>
+    <div class="swiper-slide"><img src="https://s2.loli.net/2022/08/15/thwIVXdgAJz4sMB.jpg"></div> -->
+    </div>
+    <!-- 导航按钮 上一页下一页 -->
+    <div class="swiper-button-prev"></div>
+    <div class="swiper-button-next"></div>
+    <!-- 分页器 -->
+    <div class="swiper-pagination"></div>
+    <!-- 滚动条 -->
+    <!-- <div class="swiper-scrollbar"></div> -->
+</div>
 {% endblock %}

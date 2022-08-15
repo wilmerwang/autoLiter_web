@@ -1,0 +1,36 @@
+{% extends "base.html"%}
+
+{% block title %}autoLter - tags{% endblock %}
+
+{% block styles %}
+{{super()}}
+<link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+<link href="{{ url_for('static', filename='css/jqcloud.min.css') }}" rel="stylesheet">
+{% endblock%}
+
+{% block scripts %}
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/jqcloud.min.js') }}"></script>
+<script>
+    var words = [];
+    const tag_count = JSON.parse('{{ label_count|tojson }}');
+    for (i in tag_count) {
+        words.push({text: i, weight: tag_count[i], link: "label/"+i});
+    }
+    
+    $(function() {
+        $("#tagcloud").jQCloud(words, {
+            autoResize: false,
+            fontSize: {
+                from: 0.1,
+                to: 0.02
+            },
+        }); 
+    });
+</script>
+{% endblock %}
+
+
+{% block page_content %}
+<div id="tagcloud" style="width: 100%; height: 450px; align-self: center;"></div>
+{% endblock %}

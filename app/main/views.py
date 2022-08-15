@@ -394,7 +394,7 @@ def hand_addpaper():
         else:
             date_ = datetime.datetime.utcnow()
         
-        pdf_name = title + '.pdf'
+        pdf_name = "_".join(paper.title.split(" ")) + ".pdf"
         pdf_path = "app" + os.path.join(url_for("static", filename="pdf"), pdf_name)
         if pdf_link_online:
             
@@ -419,7 +419,7 @@ def hand_addpaper():
             "paper": "add"
         })
     else:
-        pdf_name = title + '.pdf'
+        pdf_name = "_".join(paper.title.split(" ")) + ".pdf"
         pdf_path = "app" + os.path.join(url_for("static", filename="pdf"), pdf_name)
         if pdf_link_online:
             get_paper_pdf_from_paperid(paper_id, pdf_path, pdf_link_online)
@@ -435,3 +435,18 @@ def hand_addpaper():
             "paper": "add"
         })
             
+            
+
+@main.route('/tags')
+def tags():
+    label_objs = []
+    notes = Note.query.all()
+    for note in notes:
+        label_objs.extend(note.labels.all())
+    
+    label_count_dict = {}
+    for label in label_objs:
+        label = label.name
+        label_count_dict[label] = label_count_dict.get(label, 0) + 1
+        
+    return render_template('tag.html', label_count=label_count_dict)

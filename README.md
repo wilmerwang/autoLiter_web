@@ -44,6 +44,13 @@ git clone https://github.com/WilmerWang/autoLiter_web.git
   # 修改config.py里的邮箱、授权码以及其他个人选项
   ```
 
+  - 配置app/templates/index.html
+  ```
+  # 可以添加其他图片
+  <div class="swiper-slide"><img src="{{ url_for('static', filename='indexImage/10.jpeg') }}"></div>
+  
+  ```
+
 ### 3. 启动软件
 ```bash
 cd ~/autoLiter_web
@@ -110,7 +117,12 @@ sudo systemctl enable autoliter.service
 - [ ] 本地图片上传
 - [ ] PDF私有化以及PDF可编辑
 - [ ] 增加通过title下载
-
+- [ ] meta_pdf等信息下载之后，手动下载界面应当固定信息
+- [ ] 长文章折叠
+- [ ] 改进note 标签输入框
+- [x] tags词云
+- [x] 主页轮播
+ 
 ### 测试文献
 #### doi
 - 10.1038/s41467-022-29269-6

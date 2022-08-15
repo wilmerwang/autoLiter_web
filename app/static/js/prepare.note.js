@@ -73,6 +73,7 @@ $(function() {
             bootbox.alert({title:"错误提示", message:"表单未填文献ID!"});
             return false;
         }
+        var modelItems = [$("#title"), $("#journal"), $("#paper_link")]
         // 发送请求内容
         var param = "paperId=" + paperId;
         $.post('/addpaper', param, function (data) {
@@ -90,9 +91,21 @@ $(function() {
             }
             else if (data.code == "addpaper") {
                 bootbox.alert({title: "信息提示", message: "文献Meta信息下载成功"});
+                $("#headline").attr('readonly', true);
+
+                for (var item of modelItems) {
+                    item.val("已自动下载成功,无需再填").attr('readonly', true);
+                }
+                $("#paper_id").val(paperId).attr('readonly', true);
             }
             else if (data.code == "exist_paper") {
                 bootbox.alert({title: "信息提示", message: "文献Meta信息已存在"});
+                $("#headline").attr('readonly', true);
+
+                for (var item of modelItems) {
+                    item.val("已自动下载成功,无需再填").attr('readonly', true);
+                }
+                $("#paper_id").val(paperId).attr('readonly', true);
             }
             else {
                 bootbox.alert({title: "信息提示", message: "文献Meta信息下载失败,请手动添加"});
@@ -106,6 +119,7 @@ $(function() {
             bootbox.alert({title:"错误提示", message:"表单未填文献ID!"});
             return false;
         }
+        var modelItems = [$("#title"), $("#journal"), $("#paper_link")]
         // 发送请求内容
         var param = "paperId=" + paperId;
         $.post('/addpdf', param, function (data) {
@@ -132,18 +146,38 @@ $(function() {
             else {
                 if (data.pdf == "add" ) {
                     bootbox.alert({title: "信息提示", message: "PDF下载成功"});
+                    $("#headline").attr('readonly', true);
+                    for (var item of modelItems) {
+                        item.val("已自动下载成功,无需再填").attr('readonly', true);
+                    }
+                    $("#paper_id").val(paperId).attr('readonly', true);
                 }
                 else if (data.pdf == "failed" && data.paper == "exist") {
                     bootbox.alert({title: "信息提示", message: "Mate信息已存在,PDF下载失败"});
+                    $("#headline").attr('readonly', true);
+                    for (var item of modelItems) {
+                        item.val("已自动下载成功,无需再填").attr('readonly', true);
+                    }
+                    $("#paper_id").val(paperId).attr('readonly', true);
                 }
                 else if (data.pdf == "failed" && data.paper == "add") {
                     bootbox.alert({title: "信息提示", message: "Mate信息下载成功,PDF下载失败"});
+                    $("#headline").attr('readonly', true);
+                    for (var item of modelItems) {
+                        item.val("已自动下载成功,无需再填").attr('readonly', true);
+                    }
+                    $("#paper_id").val(paperId).attr('readonly', true);
                 }
                 else if (data.pdf == "failed" && data.paper == "failed") {
                     bootbox.alert({title: "信息提示", message: "Mate信息下载失败,PDF下载失败"});
                 }
                 else {
                     bootbox.alert({title: "信息提示", message: "PDF文件已存在"});
+                    $("#headline").attr('readonly', true);
+                    for (var item of modelItems) {
+                        item.val("已自动下载成功,无需再填").attr('readonly', true);
+                    }
+                    $("#paper_id").val(paperId).attr('readonly', true);
                 }
             }
         });
@@ -161,12 +195,13 @@ $(function() {
                 $("input[name=noteType][value=skimming]").attr("checked", true);
             }
         };
-        if (noteLabel!='') {
+        if (noteLabel!='None') {
             $("#myLabels").val(noteLabel);
         }
     })
 
     $("#handDownloadPaper").click(function() {
+        // if ($("#title").attr("readonly")==false) 
         var title = $("#title").val();
         var journal = $("#journal").val();
         var paper_link =  $("#paper_link").val();
@@ -201,7 +236,7 @@ $(function() {
                 bootbox.alert({title:"信息提示", message:"文献信息保存成功,pdf下载失败"});
             }
         })
-        alert($("#headline").val());
+
         $("#headline").val(paper_id);
         $("#headline").attr('readonly', true);
     })
@@ -225,10 +260,15 @@ $(function() {
             $("#pdf_link").val(paper_pdf_link);
             $("#pdf_link").attr('readonly', true);
         }
+
+        if (paper_pdf_link_online != '') {
+            $("#pdf_link_online").val(paper_pdf_link_online);
+            // $("#pdf_link_online").attr('readonly', true);
+        }
     });
 
-    $("button.cancelForm").click(function() {
-        $('.modal-body').find('form').trigger('reset');
-      });
+    // $("button.cancelForm").click(function() {
+    //     $('.modal-body').find('form').trigger('reset');
+    //   });
 
 })
