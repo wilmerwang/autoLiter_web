@@ -17,7 +17,7 @@
                 <a href="{{ intensive.paper.paper_link}}" target="_blank">[LINK]</a>
             </div>
             <div class="intro">
-                {{ intensive.content | safe}}
+                {{ intensive.content_html | safe}}
             </div>
             <div class="info">
                 <div class="pull-left">
@@ -47,7 +47,7 @@
                 <a href="{{ skimming.paper.paper_link}}" target="_blank">[LINK]</a>
             </div>
             <div class="intro">
-                {{ skimming.content | safe}},
+                {{ skimming.content_html | safe}},
             </div>
             <div class="info">
                 <div class="pull-left">
@@ -72,7 +72,7 @@
             <div class="title"><strong>{{ conclusion.title }}</strong></div>
             <div class="intro">
                 <!-- {{ conclusion.content | striptags | truncate(500) }}, -->
-                {{ conclusion.content | safe }}
+                {{ conclusion.content_html | safe }}
             </div>
             <div class="info">
                 <div class="pull-right">
@@ -93,7 +93,7 @@
         <div class="col-md-12 detail">
             <div class="title"><strong>{{ idea.title }}</strong></div>
             <div class="intro">
-                {{ idea.content | safe }}
+                {{ idea.content_html | safe }}
             </div>
             <div class="info">
                 <div class="pull-right">
