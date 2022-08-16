@@ -24,8 +24,11 @@ $(function() {
         ]
         },
         imageUpload    : true,
-        imageFormats   : ["jpg", "jpeg", "gif", "png", "bmp", "webp"],
+        imageFormats   : ["jpg", "jpeg", "gif", "png", "bmp", "webp", "pdf"],
         imageUploadURL : imageUploadURL, //"{{ url_for('static', filename='editor.md/examples/php/upload.php') }}",
+        onload: function () {
+            initPasteDragImg(this); //必须
+        }
     });
 
     $("#releasePost").click(function() {

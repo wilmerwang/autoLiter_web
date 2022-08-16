@@ -22,8 +22,11 @@ $(function() {
         ]
         },
         imageUpload    : true,
-        imageFormats   : ["jpg", "jpeg", "gif", "png", "bmp", "webp"],
+        imageFormats   : ["jpg", "jpeg", "gif", "png", "bmp", "webp", "pdf"],
         imageUploadURL : imageUploadURL,
+        onload: function () {
+            initPasteDragImg(this); //必须
+        }
     });
 
     $("#releaseNote").click(function() {

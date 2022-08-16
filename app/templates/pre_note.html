@@ -10,20 +10,21 @@
 <!-- <script src="{{ url_for('static', filename='js/jquery.min.js')}}"></script> -->
 <script src="{{ url_for('static', filename='editor.md/editormd.min.js')}}"></script>
 <script>
-// 接收后端传来的数据供单独的JS程序使用
-var editorLibPath = "{{ url_for('static', filename='editor.md/lib/') }}";
-var noteId = '{{ note.id}}';
-var noteType = '{{ note.intensive_reading | safe }}';
-var noteLabel = '{{ label }}'
-var paper_title = '{{ paper.title }}'
-var paper_id = '{{ paper.paper_id }}'
-var paper_journal = '{{ paper.journal }}'
-var paper_link = '{{ paper.paper_link }}'
-var paper_date = '{{ paper.date | safe }}'
-var paper_pdf_link = '{{ paper.pdf_link }}'
-var paper_pdf_link_online = '{{ paper.pdf_link_online }}'
-var imageUploadURL = "{{ url_for('main.upload') }}"
+    // 接收后端传来的数据供单独的JS程序使用
+    var editorLibPath = "{{ url_for('static', filename='editor.md/lib/') }}";
+    var noteId = '{{ note.id}}';
+    var noteType = '{{ note.intensive_reading | safe }}';
+    var noteLabel = '{{ label }}'
+    var paper_title = '{{ paper.title }}'
+    var paper_id = '{{ paper.paper_id }}'
+    var paper_journal = '{{ paper.journal }}'
+    var paper_link = '{{ paper.paper_link }}'
+    var paper_date = '{{ paper.date | safe }}'
+    var paper_pdf_link = '{{ paper.pdf_link }}'
+    var paper_pdf_link_online = '{{ paper.pdf_link_online }}'
+    var imageUploadURL = "{{ url_for('main.upload') }}"
 </script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/uploadImages.js')}}"></script>
 <script src="{{ url_for('static', filename='js/prepare.note.js')}}"></script>
 {% endblock %}
 
@@ -64,18 +65,15 @@ var imageUploadURL = "{{ url_for('main.upload') }}"
           </button> -->
         </div>
         <div class="modal-body">
-            <form class="form-inline">
+            <form class="form-horizontal" role="form">
                 <div class="form-group">
-                    <label>笔记类型:</label>
-                    <input type="radio" name="noteType" value="intensive"> 精读 </input>
-                    <input type="radio" name="noteType" value="skimming"> 略读 </input>
+                    <label class="col-sm-2 control-label" style="margin-top: -5px">笔记类型:</label>
+                    <div class="col-sm-10"><input type="radio" name="noteType" value="intensive"> 精读
+                    <input type="radio" name="noteType" value="skimming"> 略读</div>
                 </div>
-            </form>  
-            <!-- Lab -->
-            <form class="form-inline">
                 <div class="form-group">
-                    <label>笔记标签:</label>
-                    <input type="text" id="myLabels" placeholder="请使用英文分号(;)隔开标签"></input>
+                    <label class="col-sm-2 control-label">笔记标签</label>
+                    <div class="col-sm-10"><input type="text" id="myLabels" placeholder="请使用英文分号(;)隔开标签" class="form-control"></div>
                 </div>
             </form>  
         </div>
