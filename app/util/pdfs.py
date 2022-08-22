@@ -35,7 +35,7 @@ class pdfDownload(object):
         https://sci-hub.now.sh/
         '''
         urls = []
-        res = self.sess.get('https://lovescihub.wordpress.com/')
+        res = self.sess.get('https://lovescihub.wordpress.com/', verify=False)
         s = BeautifulSoup(res.content, 'html.parser')
         for a in s.find('div', class_="entry-content").find_all('a', href=True):
             if 'sci-hub.' in a['href']:
@@ -53,7 +53,7 @@ class pdfDownload(object):
             A dict OR None
         '''
         try:
-            r = self.sess.get(url, auth=auth)
+            r = self.sess.get(url, verify=False, auth=auth)
         
             if r.headers["Content-Type"] != "application/pdf":
                 logger.info("Failed to fetch pdf with url: {}".format(url))
@@ -81,7 +81,7 @@ class pdfDownload(object):
             A dict OR None
         '''
         for base_url in self._get_available_scihub_urls():
-            r = self.sess.get(base_url + '/' + identifier, auth=auth)
+            r = self.sess.get(base_url + '/' + identifier, verify=False, auth=auth)
             soup = BeautifulSoup(r.content, 'html.parser')
             
             pdf_div_names = ['iframe', 'embed']
