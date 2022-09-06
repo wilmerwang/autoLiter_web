@@ -473,7 +473,7 @@ def upload():
             filename=datetime.datetime.now().strftime('%Y%m%d%H%M%S')+ex
             file_path_root = 'app' + url_for('static', filename='images')
             file_path = file_path_root + "/" + filename
-            if os.path.exists(file_path_root):
+            if not os.path.exists(file_path_root):
                 os.makedirs(file_path_root)
             file.save(file_path)
             res={
