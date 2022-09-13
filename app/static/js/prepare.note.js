@@ -34,7 +34,8 @@ $(function() {
         var note_type = $("input[name=noteType]:checked").val()
         var labels = $.trim($("#myLabels").val());
         var contentMarkdown = editor.getMarkdown();
-        var contenthtml = editor.getPreviewedHTML();
+        // var contenthtml = editor.getPreviewedHTML();
+        var contenthtml = editor.getHTML();
         if (headline.length < 1) {
             bootbox.alert({title:"错误提示", message:"标题不能少于1个字"});
             return false;

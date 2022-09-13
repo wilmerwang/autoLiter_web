@@ -36,7 +36,8 @@ $(function() {
         var headline = $.trim($("#headline").val());
         var post_type = $("input[name=postType]:checked").val()
         var contentMarkdown = editor.getMarkdown();
-        var contenthtml = editor.getPreviewedHTML();
+        // var contenthtml = editor.getPreviewedHTML();
+        var contenthtml = editor.getHTML();
     
         if (headline.length < 1) {
             bootbox.alert({title:"错误提示", message:"标题不能少于1个字"});
